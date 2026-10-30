@@ -1325,7 +1325,7 @@ if (sittingTemplate) {
   let box = new THREE.Box3().setFromObject(model);
   let size = box.getSize(new THREE.Vector3());
   // Для girl.glb используем отдельный размер: модель компактнее по габаритам.
-  const targetHeight = isFemale ? 1.18 : 1.3;
+  const targetHeight = isFemale ? 1.28 : 1.3;
   if (size.y > 1e-4) {
     model.scale.multiplyScalar(targetHeight / size.y);
   }
@@ -1335,9 +1335,9 @@ if (sittingTemplate) {
 
   // Индивидуальная посадка моделей на кресло.
   // Девушку немного уменьшаем и сдвигаем ближе к спинке.
-  const offsetY = isFemale ? 0.08 : 0.1;
-  const offsetZ = isFemale ? -0.16 : -0.1;
-  const tiltX = isFemale ? -0.06 : -0.1;    
+  const offsetY = isFemale ? 0.16 : 0.1;
+  const offsetZ = isFemale ? -0.28 : -0.1;
+  const tiltX = isFemale ? -0.04 : -0.1;    
 
   // 3. Центрирование по X и Z
   box = new THREE.Box3().setFromObject(model);
