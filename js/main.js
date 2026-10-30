@@ -651,7 +651,7 @@ scene.add(camera); // Камера должна быть в сцене
 let handsModel = null;
 const handsLoader = new GLTFLoader();
 handsLoader.load(
-  'hands.glb',
+  'models/hands.glb',
   (gltf) => {
     handsModel = gltf.scene;
 
@@ -1283,11 +1283,13 @@ function buildHead(g, mats, headY) {
 
 /* ==== ЗАГРУЗКА man.glb ==== */
 let manTemplate = null;
+let girlTemplate = null;
 const manLoader = new GLTFLoader();
 manLoader.load(
-  'man.glb',
+  'models/man.glb',
   (gltf) => {
     manTemplate = gltf.scene;
+    refreshPassengerModels();
     console.log('[man.glb] загружено успешно');
   },
   undefined,
@@ -1295,15 +1297,29 @@ manLoader.load(
     console.warn('[man.glb] не загрузилось — останутся процедурные пассажиры', err);
   }
 );
+const girlLoader = new GLTFLoader();
+girlLoader.load(
+  'models/girl.glb',
+  (gltf) => {
+    girlTemplate = gltf.scene;
+    refreshPassengerModels();
+    console.log('[girl.glb] загружено успешно');
+  },
+  undefined,
+  (err) => {
+    console.warn('[girl.glb] не загрузилось — для пассажирок будет использована запасная модель', err);
+  }
+);
 
-function buildSittingHuman() {
+function buildSittingHuman(isFemale = false) {
   const g = new THREE.Group();
   let torso = null;
   let torsoBaseY = 0.94;
 
 // Если модель загружена — используем её
-if (manTemplate) {
-  const model = cloneSkeleton(manTemplate);
+const sittingTemplate = isFemale ? (girlTemplate || manTemplate) : (manTemplate || girlTemplate);
+if (sittingTemplate) {
+  const model = cloneSkeleton(sittingTemplate);
   
   // 1. Автомасштабирование
   let box = new THREE.Box3().setFromObject(model);
@@ -1416,8 +1432,20 @@ function buildStandingHuman() {
 }
 
 const passengers = [];
+function refreshPassengerModels() {
+  for (const p of passengers) {
+    const person = buildSittingHuman(p.isFemale);
+    for (const child of [...p.group.children]) {
+      if (child !== p.ind) p.group.remove(child);
+    }
+    p.group.add(person.group);
+    p.torso = person.torso;
+    p.baseY = person.torsoBaseY;
+  }
+}
 function createPassenger(chair, opts = {}) {
-  const person = buildSittingHuman();
+  const isF = Math.random() < 0.5;
+  const person = buildSittingHuman(isF);
   const g = person.group;
   g.position.set(chair.x, 0, chair.z);
   g.rotation.y = chair.facing < 0 ? 0 : Math.PI;
@@ -1439,7 +1467,6 @@ function createPassenger(chair, opts = {}) {
   timerSprite.scale.set(0.34, 0.14, 1); timerSprite.position.set(0, 0.26, 0); ind.add(timerSprite);
   scene.add(g);
   const pers = rand(PERSONALITIES);
-  const isF = Math.random() < 0.5;
   const p = {
     group: g, torso: person.torso, head: null,
     ind, excl, payIcon, bar, barBg, exitIcon, timerSprite, indBaseY,
@@ -1722,7 +1749,7 @@ for (const hx of [-0.28, 0.28]) {
 /* ==== ЗАГРУЗКА cart.glb ==== */
 const gltfLoader = new GLTFLoader();
 gltfLoader.load(
-  'cart.glb',
+  'models/cart.glb',
   (gltf) => {
     const model = gltf.scene;
 
