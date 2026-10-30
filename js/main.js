@@ -1324,23 +1324,20 @@ if (sittingTemplate) {
   // 1. Автомасштабирование
   let box = new THREE.Box3().setFromObject(model);
   let size = box.getSize(new THREE.Vector3());
-  // Масштабируем модель под нужный размер (подберите 1.3 под ваш вкус)
+  // Для girl.glb используем отдельный размер: модель компактнее по габаритам.
+  const targetHeight = isFemale ? 1.18 : 1.3;
   if (size.y > 1e-4) {
-    model.scale.multiplyScalar(1.3 / size.y);
+    model.scale.multiplyScalar(targetHeight / size.y);
   }
 
-  // 2. Поворот (на 180 градусов, чтобы смотрел вперед)
+  // Поворот на 180 градусов, чтобы пассажир смотрел в проход.
   model.rotation.y = Math.PI;
 
-  // --- НАСТРОЙКИ ПОЛОЖЕНИЯ (КРУТИТЕ ЗДЕСЬ) ---
-  // Опускаем модель вниз, чтобы она села на сиденье (сиденье находится на высоте ~0.48)
-  const offsetY = 0.1; 
-  
-  // Сдвигаем модель по оси Z (назад к спинке или вперед)
-  const offsetZ = -0.1;   
-
-  // Наклоняем корпус (если нужно, чтобы пассажир сидел с наклоном)
-  const tiltX = -0.1;    
+  // Индивидуальная посадка моделей на кресло.
+  // Девушку немного уменьшаем и сдвигаем ближе к спинке.
+  const offsetY = isFemale ? 0.08 : 0.1;
+  const offsetZ = isFemale ? -0.16 : -0.1;
+  const tiltX = isFemale ? -0.06 : -0.1;    
 
   // 3. Центрирование по X и Z
   box = new THREE.Box3().setFromObject(model);
